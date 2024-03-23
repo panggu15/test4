@@ -598,9 +598,6 @@ def make_train_dataset(args, accelerator):
 
     from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
     
-    # clip_encoder = CLIPVisionModel.from_pretrained("openai/clip-vit-base-patch32").cuda()
-    clip_encoder = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-base-patch32").cuda()
-    clip_encoder.requires_grad_(False)
     clip_processor = CLIPImageProcessor()
 
     image_transforms = transforms.Compose(
@@ -706,6 +703,7 @@ def main(args):
     from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
     
     image_encoder = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-base-patch32")
+    # clip_encoder = CLIPVisionModel.from_pretrained("openai/clip-vit-base-patch32").cuda()
 
     # Load scheduler and models
     noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
@@ -943,7 +941,7 @@ def main(args):
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
 
                 # Get the text embedding for conditioning
-                image_embeds = clip_encoder(batch["pixel_values"].to(accelerator.device, dtype=weight_dtype))[0] # (batch_size, 512)
+                image_embeds = image_encoder(batch["pixel_values"].to(accelerator.device, dtype=weight_dtype))[0] # (batch_size, 512)
 
                 encoder_hidden_states = image_proj_model(image_embeds)
                 print('encoder_hidden_states', encoder_hidden_states.shape)
