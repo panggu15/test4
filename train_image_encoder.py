@@ -705,7 +705,7 @@ def main(args):
     # import correct image encoder class
     from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
     
-    image_encoder = CLIPVisionModelWithProjection.from_pretrained(args.image_encoder_path)
+    image_encoder = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-base-patch32")
 
     # Load scheduler and models
     noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
