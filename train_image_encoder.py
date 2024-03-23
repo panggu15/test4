@@ -623,7 +623,7 @@ def make_train_dataset(args, accelerator):
         raw_images = [read_url(image).convert("RGB") for image in examples['image_file']]
         images = [image_transforms(image) for image in raw_images]
 
-        clip_image = clip_processor(images=images, return_tensors="pt").pixel_values # (1, 3, 224, 224)
+        clip_image = clip_processor(images=raw_images, return_tensors="pt").pixel_values # (1, 3, 224, 224)
         
         examples["pixel_values"] = images
 
