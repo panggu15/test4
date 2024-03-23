@@ -703,6 +703,8 @@ def main(args):
             os.makedirs(args.output_dir, exist_ok=True)
 
     # import correct image encoder class
+    from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
+    
     image_encoder = CLIPVisionModelWithProjection.from_pretrained(args.image_encoder_path)
 
     # Load scheduler and models
@@ -949,27 +951,15 @@ def main(args):
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
 
                 # Get the text embedding for conditioning
-                encoder_hidden_states = clip_encoder(batch["input_ids"])[0]
+                image_embeds = clip_encoder(batch["pixel_values"].to(accelerator.device, dtype=weight_dtype))[0] # (batch_size, 512)
 
-                controlnet_image = batch["pixel_values"].to(dtype=weight_dtype)
-
-                down_block_res_samples, mid_block_res_sample = controlnet(
-                    noisy_latents,
-                    timesteps,
-                    encoder_hidden_states=encoder_hidden_states,
-                    controlnet_cond=controlnet_image,
-                    return_dict=False,
-                )
-
+                encoder_hidden_states = image_proj_model(image_embeds)
+                print('encoder_hidden_states', encoder_hidden_states.shape)
                 # Predict the noise residual
                 model_pred = unet(
                     noisy_latents,
                     timesteps,
                     encoder_hidden_states=encoder_hidden_states,
-                    down_block_additional_residuals=[
-                        sample.to(dtype=weight_dtype) for sample in down_block_res_samples
-                    ],
-                    mid_block_additional_residual=mid_block_res_sample.to(dtype=weight_dtype),
                 ).sample
 
                 # Get the target for loss depending on the prediction type
