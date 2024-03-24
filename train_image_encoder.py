@@ -1044,6 +1044,7 @@ def main(args):
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
         ImageProjModel = accelerator.unwrap_model(ImageProjModel)
+        torch.save(ImageProjModel.state_dict(), PATH)
         ImageProjModel.save_pretrained(args.output_dir)
 
         if args.push_to_hub:
