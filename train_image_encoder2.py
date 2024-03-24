@@ -136,7 +136,7 @@ def log_validation(vae, text_encoder, tokenizer,unet, image_encoder, image_proj_
                 encoder_hidden_states = image_proj_model(image_embeds) # (N, 4, 1024)
                 
                 image = pipeline(
-                    '', validation_image, num_inference_steps=50, generator=generator, prompt_embeds=encoder_hidden_states,
+                    '', num_inference_steps=50, generator=generator, prompt_embeds=encoder_hidden_states,
                 ).images[0]
             images.append(image)
             
