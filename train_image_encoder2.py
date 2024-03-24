@@ -1046,6 +1046,17 @@ def main(args):
                 ignore_patterns=["step_*", "epoch_*"],
             )
 
+    image_logs = log_validation(
+                            vae,
+                            text_encoder,
+                            tokenizer,
+                            unet,
+                            image_encoder, image_proj_model,
+                            args,
+                            accelerator,
+                            weight_dtype,
+                            global_step,
+                        )
     accelerator.end_training()
 
 
