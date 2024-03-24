@@ -47,6 +47,7 @@ from diffusers import (
     ControlNetModel,
     DDPMScheduler,
     StableDiffusionControlNetPipeline,
+    StableDiffusionPipeline,
     UNet2DConditionModel,
     UniPCMultistepScheduler,
 )
@@ -75,18 +76,16 @@ def image_grid(imgs, rows, cols):
     return grid
 
 
-def log_validation(vae, text_encoder, tokenizer, unet, controlnet, args, accelerator, weight_dtype, step):
+def log_validation(vae, text_encoder, tokenizer, unet, image_encoder, image_proj_model, args, accelerator, weight_dtype, step):
     logger.info("Running validation... ")
 
-    controlnet = accelerator.unwrap_model(controlnet)
+    image_proj_model = accelerator.unwrap_model(image_proj_model)
 
-    pipeline = StableDiffusionControlNetPipeline.from_pretrained(
+    pipeline = StableDiffusionPipeline.from_pretrained(
         args.pretrained_model_name_or_path,
         vae=vae,
-        text_encoder=text_encoder,
         tokenizer=tokenizer,
         unet=unet,
-        controlnet=controlnet,
         safety_checker=None,
         revision=args.revision,
         torch_dtype=weight_dtype,
@@ -117,61 +116,36 @@ def log_validation(vae, text_encoder, tokenizer, unet, controlnet, args, acceler
             "number of `args.validation_image` and `args.validation_prompt` should be checked in `parse_args`"
         )
 
+    clip_processor = CLIPImageProcessor()
+    
+    validation_images = args.validation_image
     image_logs = []
 
-    for validation_prompt, validation_image in zip(validation_prompts, validation_images):
+    for validation_image in validation_images:
         validation_image = Image.open(validation_image).convert("RGB")
 
         images = []
 
         for _ in range(args.num_validation_images):
             with torch.autocast("cuda"):
+                clip_image = clip_processor(images=validation_image, return_tensors="pt").pixel_values # (1, 3, 224, 224)
+                image_embeds = image_encoder(clip_image.to(accelerator.device, dtype=weight_dtype))[0] # (N, 512)
+                
+                encoder_hidden_states = image_proj_model(image_embeds) # (N, 4, 1024)
+                
                 image = pipeline(
-                    validation_prompt, validation_image, num_inference_steps=20, generator=generator
+                    '', validation_image, num_inference_steps=50, generator=generator, prompt_embeds=encoder_hidden_states,
                 ).images[0]
-
             images.append(image)
+            
+            validation_image.save(f'/kaggle/working/base{_}.png')
+            image.save(f'/kaggle/working/{_}.png')
 
         image_logs.append(
-            {"validation_image": validation_image, "images": images, "validation_prompt": validation_prompt}
+            {"validation_image": validation_image, "images": images}
         )
 
-    for tracker in accelerator.trackers:
-        if tracker.name == "tensorboard":
-            for log in image_logs:
-                images = log["images"]
-                validation_prompt = log["validation_prompt"]
-                validation_image = log["validation_image"]
-
-                formatted_images = []
-
-                formatted_images.append(np.asarray(validation_image))
-
-                for image in images:
-                    formatted_images.append(np.asarray(image))
-
-                formatted_images = np.stack(formatted_images)
-
-                tracker.writer.add_images(validation_prompt, formatted_images, step, dataformats="NHWC")
-        elif tracker.name == "wandb":
-            formatted_images = []
-
-            for log in image_logs:
-                images = log["images"]
-                validation_prompt = log["validation_prompt"]
-                validation_image = log["validation_image"]
-
-                formatted_images.append(wandb.Image(validation_image, caption="Controlnet conditioning"))
-
-                for image in images:
-                    image = wandb.Image(image, caption=validation_prompt)
-                    formatted_images.append(image)
-
-            tracker.log({"validation": formatted_images})
-        else:
-            logger.warn(f"image logging not implemented for {tracker.name}")
-
-        return image_logs
+    return image_logs
 
 
 def import_model_class_from_model_name_or_path(pretrained_model_name_or_path: str, revision: str):
@@ -1024,7 +998,7 @@ def main(args):
                             text_encoder,
                             tokenizer,
                             unet,
-                            controlnet,
+                            image_encoder, image_proj_model,
                             args,
                             accelerator,
                             weight_dtype,
