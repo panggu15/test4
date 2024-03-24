@@ -943,8 +943,8 @@ def main(args):
                 # Get the text embedding for conditioning
                 image_embeds = image_encoder(batch["pixel_values"].to(accelerator.device, dtype=weight_dtype))[0] # (batch_size, 512)
 
-                encoder_hidden_states = image_proj_model(image_embeds)
-                print('encoder_hidden_states', encoder_hidden_states.shape)
+                encoder_hidden_states = image_proj_model(image_embeds) # (4, 4, 1024)
+                
                 # Predict the noise residual
                 model_pred = unet(
                     noisy_latents,
