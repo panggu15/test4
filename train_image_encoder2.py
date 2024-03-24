@@ -55,6 +55,7 @@ from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version, is_wandb_available
 from diffusers.utils.import_utils import is_xformers_available
 
+from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
 
 if is_wandb_available():
     import wandb
@@ -76,7 +77,7 @@ def image_grid(imgs, rows, cols):
     return grid
 
 
-def log_validation(vae, unet, image_encoder, image_proj_model, args, accelerator, weight_dtype, step):
+def log_validation(vae, text_encoder, tokenizer,unet, image_encoder, image_proj_model, args, accelerator, weight_dtype, step):
     logger.info("Running validation... ")
 
     image_proj_model = accelerator.unwrap_model(image_proj_model)
@@ -84,6 +85,8 @@ def log_validation(vae, unet, image_encoder, image_proj_model, args, accelerator
     pipeline = StableDiffusionPipeline.from_pretrained(
         args.pretrained_model_name_or_path,
         vae=vae,
+        text_encoder=text_encoder,
+        tokenizer=tokenizer,
         unet=unet,
         safety_checker=None,
         revision=args.revision,
@@ -671,13 +674,24 @@ def main(args):
             os.makedirs(args.output_dir, exist_ok=True)
 
     # import correct image encoder class
-    from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
-    
     image_encoder = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-base-patch32")
     # clip_encoder = CLIPVisionModel.from_pretrained("openai/clip-vit-base-patch32").cuda()
 
     # Load scheduler and models
     noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
+    if args.tokenizer_name:
+        tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name, revision=args.revision, use_fast=False)
+    elif args.pretrained_model_name_or_path:
+        tokenizer = AutoTokenizer.from_pretrained(
+            args.pretrained_model_name_or_path,
+            subfolder="tokenizer",
+            revision=args.revision,
+            use_fast=False,
+        )
+    text_encoder_cls = import_model_class_from_model_name_or_path(args.pretrained_model_name_or_path, args.revision)
+    text_encoder = text_encoder_cls.from_pretrained(
+        args.pretrained_model_name_or_path, subfolder="text_encoder", revision=args.revision, variant=args.variant
+    )
     vae = AutoencoderKL.from_pretrained(args.pretrained_model_name_or_path, subfolder="vae", revision=args.revision)
     unet = UNet2DConditionModel.from_pretrained(
         args.pretrained_model_name_or_path, subfolder="unet", revision=args.revision
@@ -994,6 +1008,8 @@ def main(args):
                     if args.validation_prompt is not None and global_step % args.validation_steps == 0:
                         image_logs = log_validation(
                             vae,
+                            text_encoder,
+                            tokenizer,
                             unet,
                             image_encoder, image_proj_model,
                             args,
