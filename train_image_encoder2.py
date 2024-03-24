@@ -720,7 +720,7 @@ def main(args):
     image_proj_model = ImageProjModel(
         cross_attention_dim=unet.config.cross_attention_dim,
         clip_embeddings_dim=image_encoder.config.projection_dim,
-        clip_extra_context_tokens=4,
+        clip_extra_context_tokens=77,
     ).to(accelerator.device)
 
     # `accelerate` 0.16.0 will have better support for customized saving
