@@ -939,12 +939,12 @@ def main(args):
                 # Add noise to the latents according to the noise magnitude at each timestep
                 # (this is the forward diffusion process)
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
-                print('clip', batch["pixel_values"].shape)
+                
                 # Get the text embedding for conditioning
                 image_embeds = image_encoder(batch["pixel_values"].to(accelerator.device, dtype=weight_dtype))[0] # (batch_size, 512)
-
+                print('image_embeds', image_embeds.shape)
                 encoder_hidden_states = image_proj_model(image_embeds) # (4, 4, 1024)
-                
+                print('encoder_hidden_states', encoder_hidden_states.shape)
                 # Predict the noise residual
                 model_pred = unet(
                     noisy_latents,
