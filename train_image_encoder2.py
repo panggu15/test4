@@ -76,7 +76,7 @@ def image_grid(imgs, rows, cols):
     return grid
 
 
-def log_validation(vae, text_encoder, tokenizer, unet, image_encoder, image_proj_model, args, accelerator, weight_dtype, step):
+def log_validation(vae, unet, image_encoder, image_proj_model, args, accelerator, weight_dtype, step):
     logger.info("Running validation... ")
 
     image_proj_model = accelerator.unwrap_model(image_proj_model)
@@ -84,7 +84,6 @@ def log_validation(vae, text_encoder, tokenizer, unet, image_encoder, image_proj
     pipeline = StableDiffusionPipeline.from_pretrained(
         args.pretrained_model_name_or_path,
         vae=vae,
-        tokenizer=tokenizer,
         unet=unet,
         safety_checker=None,
         revision=args.revision,
@@ -995,8 +994,6 @@ def main(args):
                     if args.validation_prompt is not None and global_step % args.validation_steps == 0:
                         image_logs = log_validation(
                             vae,
-                            text_encoder,
-                            tokenizer,
                             unet,
                             image_encoder, image_proj_model,
                             args,
