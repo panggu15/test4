@@ -939,7 +939,7 @@ def main(args):
                 # Add noise to the latents according to the noise magnitude at each timestep
                 # (this is the forward diffusion process)
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
-
+                print('clip', batch["pixel_values"].shape)
                 # Get the text embedding for conditioning
                 image_embeds = image_encoder(batch["pixel_values"].to(accelerator.device, dtype=weight_dtype))[0] # (batch_size, 512)
 
