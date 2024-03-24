@@ -1045,7 +1045,7 @@ def main(args):
     if accelerator.is_main_process:
         image_proj_model = accelerator.unwrap_model(image_proj_model)
         torch.save(image_proj_model.state_dict(), os.path.join(args.output_dir, 'model.pt'))
-        image_proj_model.save_pretrained(args.output_dir)
+        # image_proj_model.save_pretrained(args.output_dir)
 
         if args.push_to_hub:
             save_model_card(
