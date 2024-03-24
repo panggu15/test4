@@ -123,7 +123,7 @@ def log_validation(vae, text_encoder, tokenizer,unet, image_encoder, image_proj_
     validation_images = args.validation_image
     image_logs = []
 
-    for validation_image in validation_images:
+    for idx, validation_image in enumerate(validation_images):
         validation_image = Image.open(validation_image).convert("RGB")
 
         images = []
@@ -140,8 +140,8 @@ def log_validation(vae, text_encoder, tokenizer,unet, image_encoder, image_proj_
                 ).images[0]
             images.append(image)
             
-            validation_image.save(f'/kaggle/working/base{_}.png')
-            image.save(f'/kaggle/working/{_}.png')
+            image.save(f'/kaggle/working/{idx}_{_}.png')
+        validation_image.save(f'/kaggle/working/{idx}_base.png')
 
         image_logs.append(
             {"validation_image": validation_image, "images": images}
