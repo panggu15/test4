@@ -577,7 +577,7 @@ def make_train_dataset(args, tokenizer, accelerator):
 
     df = pd.read_csv(args.data_file)
     data_dict = {
-        'image_file': df['url'].tolist(),
+        'image_file': df['image_file'].tolist(),
         'text': df['text'].tolist()
     }
     dataset = Dataset.from_dict(data_dict)
