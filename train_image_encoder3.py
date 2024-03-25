@@ -710,7 +710,7 @@ def main(args):
             os.makedirs(args.output_dir, exist_ok=True)
 
     # import correct image encoder class
-    image_encoder = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-large-patch14") # openai/clip-vit-large-patch14 openai/clip-vit-base-patch32
+    image_encoder = CLIPVisionModelWithProjection.from_pretrained("openai/clip-vit-base-patch32") # openai/clip-vit-large-patch14 openai/clip-vit-base-patch32
     # clip_encoder = CLIPVisionModel.from_pretrained("openai/clip-vit-base-patch32").cuda()
 
     # Load scheduler and models
