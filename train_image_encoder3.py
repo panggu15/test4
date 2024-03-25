@@ -57,6 +57,8 @@ from diffusers.utils.import_utils import is_xformers_available
 
 from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
 
+image_weight = 0.3
+
 if is_wandb_available():
     import wandb
 
@@ -143,7 +145,7 @@ def log_validation(vae, text_encoder, tokenizer,unet, image_encoder, image_proj_
                     '',
                 )
 
-                encoder_hidden_states = encoder_hidden_states*0.1 + prompt_embeds*0.9
+                encoder_hidden_states = encoder_hidden_states*image_weight + prompt_embeds*(1-image_weight)
                 
                 image = pipeline(
                     num_inference_steps=50, generator=generator, prompt_embeds=encoder_hidden_states,
@@ -986,7 +988,7 @@ def main(args):
                 
                 encoder_hidden_states = image_proj_model(image_embeds) # (N, 4, 1024)
                 text_encoder_hidden_states = text_encoder(batch["input_ids"], return_dict=False)[0]
-                encoder_hidden_states = encoder_hidden_states*0.1 + text_encoder_hidden_states*0.9
+                encoder_hidden_states = encoder_hidden_states*image_weight + text_encoder_hidden_states*(1-image_weight)
                 
                 # Predict the noise residual
                 model_pred = unet(
