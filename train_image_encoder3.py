@@ -96,7 +96,7 @@ def log_validation(vae, text_encoder, tokenizer,unet, image_encoder, image_proj_
     )
     pipeline.scheduler = UniPCMultistepScheduler.from_config(pipeline.scheduler.config)
     pipeline = pipeline.to(accelerator.device)
-    # pipeline.set_progress_bar_config(disable=True)
+    pipeline.set_progress_bar_config(disable=True)
 
     if args.enable_xformers_memory_efficient_attention:
         pipeline.enable_xformers_memory_efficient_attention()
