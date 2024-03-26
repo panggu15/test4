@@ -57,7 +57,7 @@ from diffusers.utils.import_utils import is_xformers_available
 
 from transformers import CLIPImageProcessor, CLIPTextModel, CLIPTokenizer, CLIPVisionModelWithProjection, CLIPVisionModel
 
-image_weight = 0.2
+image_weight = 0.1
 
 if is_wandb_available():
     import wandb
