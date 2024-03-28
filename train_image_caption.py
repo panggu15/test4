@@ -44,7 +44,7 @@ model = BlipForConditionalGeneration.from_pretrained(model_id).to(device)
 import datasets
 from datasets import Dataset
 
-train_data = pd.read_csv('data.csv')
+train_data = pd.read_csv('/kaggle/working/data.csv')
 
 # train_data.loc[12263, 'comments'] = train_data.loc[12263, 'comments'].replace('. ,', ',')
 
