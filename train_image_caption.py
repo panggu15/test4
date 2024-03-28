@@ -41,7 +41,8 @@ from transformers import TrainingArguments, Trainer
 model_id = "Salesforce/blip-image-captioning-base"
 
 processor = AutoProcessor.from_pretrained(model_id)
-model = BlipForConditionalGeneration.from_pretrained(model_id).to(device)
+# model = BlipForConditionalGeneration.from_pretrained(model_id).to(device)
+model = BlipForConditionalGeneration().to(device)
 
 import datasets
 from datasets import Dataset
