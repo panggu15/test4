@@ -1,3 +1,5 @@
+import os
+os.environ["WANDB_DISABLED"] = "true"
 import torch
 import torch.nn as nn
 import pandas as pd
