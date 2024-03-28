@@ -41,8 +41,7 @@ from transformers import TrainingArguments, Trainer
 model_id = "Salesforce/blip-image-captioning-base"
 
 processor = AutoProcessor.from_pretrained(model_id)
-# model = BlipForConditionalGeneration.from_pretrained(model_id).to(device)
-model = BlipForConditionalGeneration().to(device)
+model = BlipForConditionalGeneration.from_pretrained(model_id).to(device)
 
 import datasets
 from datasets import Dataset
@@ -101,7 +100,7 @@ training_args = TrainingArguments(
     num_train_epochs=CFG['EPOCHS'],
     per_device_train_batch_size=CFG['BATCH_SIZE'],
     per_device_eval_batch_size=CFG['BATCH_SIZE'],
-    gradient_accumulation_steps=2,
+    gradient_accumulation_steps=4,
     save_total_limit=2,
     remove_unused_columns=False,
     label_names=["labels"],
