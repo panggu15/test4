@@ -97,6 +97,8 @@ valid_dataset = train_dataset.select(list(range(1000)))
 
 training_args = TrainingArguments(
     output_dir = "./",
+    logging_dir = './logs',
+    logging_steps = 50,
     learning_rate = CFG['LR'],
     num_train_epochs=CFG['EPOCHS'],
     per_device_train_batch_size=CFG['BATCH_SIZE'],
