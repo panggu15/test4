@@ -61,7 +61,7 @@ train_data = pd.read_csv('/kaggle/working/data.csv')
 # train_data['comments'] = train_data['comments'].map(fix_sentence)
 
 data_dict = {
-    'image': train_data['image_file'].tolist(),
+    'image': train_data['url'].tolist(),
     'text': train_data['text'].tolist(),
 }
 
