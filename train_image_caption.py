@@ -42,7 +42,7 @@ model_id = "Salesforce/blip-image-captioning-base"
 
 processor = AutoProcessor.from_pretrained(model_id)
 model = BlipForConditionalGeneration.from_pretrained(model_id).to(device)
-model.init_weights()
+# model.init_weights()
 
 import datasets
 from datasets import Dataset
