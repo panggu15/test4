@@ -18,7 +18,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 CFG = {
     'IMG_SIZE':224,
-    'EPOCHS':2, #Your Epochs,
+    'EPOCHS':4, #Your Epochs,
     'LR':5e-5, #Your Learning Rate,
     'BATCH_SIZE':4, #Your Batch Size,
     'SEED':41
