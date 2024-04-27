@@ -828,7 +828,7 @@ def main(args):
     # If passed along, set the training seed now.
     if args.seed is not None:
         set_seed(args.seed)
-    print('ssss')
+    
     # Generate class images if prior preservation is enabled.
     if args.with_prior_preservation:
         class_images_dir = Path(args.class_data_dir)
@@ -881,7 +881,7 @@ def main(args):
         if args.output_dir is not None:
             os.makedirs(args.output_dir, exist_ok=True)
 
-    print('ssss')
+    
     # Load the tokenizer
     if args.tokenizer_name:
         tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_name, revision=args.revision, use_fast=False)
@@ -892,7 +892,7 @@ def main(args):
             revision=args.revision,
             use_fast=False,
         )
-    print('ssss')
+    
     # import correct text encoder class
     text_encoder_cls = import_model_class_from_model_name_or_path(args.pretrained_model_name_or_path, args.revision)
 
@@ -1361,3 +1361,7 @@ def main(args):
         pipeline.save_pretrained(args.output_dir)
 
     accelerator.end_training()
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
